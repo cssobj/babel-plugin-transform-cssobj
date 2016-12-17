@@ -1,6 +1,10 @@
 # babel-plugin-transform-cssobj-jsx
 Babel plugin to transform class names into cssobj localized names, easily transform existing code into cssobj.
 
+[![Join the chat at https://gitter.im/css-in-js/cssobj](https://badges.gitter.im/css-in-js/cssobj.svg)](https://gitter.im/css-in-js/cssobj)
+[![Build Status](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj-jsx.svg?branch=master)](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj-jsx)
+[![Coverage Status](https://coveralls.io/repos/github/cssobj/babel-plugin-transform-cssobj-jsx/badge.svg?branch=master)](https://coveralls.io/github/cssobj/babel-plugin-transform-cssobj-jsx?branch=master)
+
 ## Usage
 
 1. Install
@@ -17,14 +21,15 @@ Babel plugin to transform class names into cssobj localized names, easily transf
   }
   ```
 
-3. In you JSX, consume cssobj result as below:
+3. **Wrap your JSX in result.mapClass()**
 
     ``` javascript
     const style = cssobj(obj)
 
-    const html = (
-        <div className={'nav', style}>
-        <p className={'!news item active', style}> </p></div>
+    const html = style.mapClass(
+      <div className='container'>
+        <div className={func()}>
+        <p className='!news item active'> </p></div></div>
     )
     ```
 
@@ -32,43 +37,47 @@ Babel plugin to transform class names into cssobj localized names, easily transf
 
     ``` javascript
     const html = (
-        <div className={result.mapClass('nav')}>
-        <p className={result.mapClass('!news item active')}> </p></div>
+      <div className={style.mapClass('container')}>
+        <div className={style.mapClass(func())}>
+        <p className={style.mapClass('!news item active')}> </p></div></div>
     )
     ```
 
-  Note: According to **cssobj** `mapClass` rule, the `news` will not localized (aka keep AS IS).
+  Note: According to **cssobj** `mapClass` rule, the `!news` will become `news` and not localized (aka keep AS IS).
 
 ## More Usage
 
-  - **Case 1** Your existing code already use Sequence Expression
+    This plugin only transform the format: `result.mapClass(JSX)`
 
-    Use below to prevent this plugin to transform:
-
-    ```Javascript
-    // existing code
-    <div className={init(), get()}>
-
-    // prevent transform
-    <div className={init(), get(), true}>
-
-    // will result as (same as existing code)
-    <div className={init(), get()}>
-    ```
-
-  - **Case 2** You are debugging, want temp disable the transform
-
-    Use below to keep you class names untouched (not mapped)
+    But if your existing code already has the form, you have two way to escape the transform
 
     ```Javascript
-    // pass null as last object
-    <div className={'a b c', null}>
-
-    // will result as
-    <div className={'a b c'}>
+    // existing code, you don't want below to transform
+    myObj.mapClass(<div className='abc'>)
     ```
+
+1. transform the method call as `myObj['mapClass']`
+
+2. pass a plugin option `mapName` to use other name rather than `mapClass`
+
+  ``` json
+  {
+    "plugins": [ ["transform-cssobj-jsx", {mapName: 'makeLocal'}] ]
+  }
+  ```
+
+  Then you can use `makeLocal` instead of `mapClass`
+
+  ```javascript
+  // below will be transformed
+  style.makeLocal(<div className='nav'></div>
+
+  // your existing code keep untouched
+  myObj.mapClass(<div className='abc'>)
+  ```
+
 
 ## TODO
 
  - [ ] Support JSX Spread
- - [ ] Child element should regard to parent cssobj scope
+ - [x] Child element should regard to parent cssobj scope
