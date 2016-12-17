@@ -1,28 +1,40 @@
 // Babel plugin to transform class names into cssobj localized
+
 module.exports = function (babel) {
   var t = babel.types
 
+  var transformClassVisitor = {
+    JSXAttribute (path) {
+      var node = path.node
+      if (!node.name || !node.value || ['className', 'class'].indexOf(node.name.name)<0) return
+      // get the right mapClass arguments
+      var exp = t.isJSXExpressionContainer(node.value)
+          ? node.value.expression
+          : node.value
+      // transform ExpressionContainer to be result.mapClass(exp)
+      node.value = t.jSXExpressionContainer(
+        t.callExpression(
+          t.memberExpression(this.resultObj, t.identifier('mapClass')),
+          [exp]
+        )
+      )
+    }
+  }
   return {
     inherits: require('babel-plugin-syntax-jsx'),
     visitor: {
-      JSXAttribute: function (path) {
-        var node = path.node
-        if (!node.name || !node.value || ['className', 'class'].indexOf(node.name.name)<0) return
-        if (t.isJSXExpressionContainer(node.value)) {
-          if(t.isSequenceExpression(node.value.expression)) {
-            var values = node.value.expression.expressions
-            var resultObj = values[values.length-1]
-            var classStr = values[0]
-            var exp =  /Literal$/.test(resultObj.type)
-                ? (resultObj.value == null
-                   ? classStr
-                   : t.sequenceExpression(node.value.expression.expressions.slice(0,-1)))
-                : t.callExpression(
-                  t.memberExpression(resultObj, t.identifier('mapClass')),
-                  [classStr]
-                )
-            node.value = t.jSXExpressionContainer(exp)
-          }
+      CallExpression (path, state) {
+        // get mapClass name from plugin options
+        var mapName = state.mapName || (state.opts && state.opts.mapName) || 'mapClass'
+        var callee = path.node.callee
+        var args = path.node.arguments
+        // only this form: result.mapClass(JSX)
+        if(!callee.computed &&
+           t.isMemberExpression(callee) &&
+           t.isIdentifier(callee.property, {name: mapName}) &&
+           t.isJSXElement(args[0])) {
+          path.traverse(transformClassVisitor, { resultObj: callee.object })
+          path.replaceWith(args[0])
         }
       }
     }

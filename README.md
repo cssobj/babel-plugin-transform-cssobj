@@ -6,7 +6,7 @@ Babel plugin to transform class names into cssobj localized names, easily transf
 1. Install
 
   ``` bash
-  npm install --save-dev babel-plugin-syntax-jsx babel-plugin-transform-cssobj-jsx
+  npm install --save-dev babel-plugin-transform-cssobj-jsx
   ```
 
 2. In your `.babelrc`:
