@@ -43,26 +43,28 @@ Babel plugin to transform class names into cssobj localized names, easily transf
     )
     ```
 
-  Note: According to **cssobj** `mapClass` rule, the `!news` will become `news` and not localized (aka keep AS IS).
+  **Note**: According to **cssobj** `mapClass` rule, the `!news` will become `news` and not localized (aka keep AS IS).
 
 ## More Usage
 
-    This plugin only transform the format: `result.mapClass(JSX)`
+  This plugin only transform the format: **result.mapClass(JSX)**
 
-    But if your existing code already has the form, you have two way to escape the transform
+  But if your existing code already has the form, .e.g:
 
-    ```Javascript
-    // existing code, you don't want below to transform
-    myObj.mapClass(<div className='abc'>)
-    ```
+  ```Javascript
+  // existing code, you don't want below to transform
+  myObj.mapClass(<div className='abc'>should not be transformed</div>)
+  ```
 
-1. transform the method call as `myObj['mapClass']`
+You have two way to escape the transform
 
-2. pass a plugin option `mapName` to use other name rather than `mapClass`
+1. Transform the method call as `myObj['mapClass']`
+
+2. Pass **plugin option** `mapName` to use other name rather than `mapClass`
 
   ``` json
   {
-    "plugins": [ ["transform-cssobj-jsx", {mapName: 'makeLocal'}] ]
+    "plugins": [ ["transform-cssobj-jsx", {"mapName": "makeLocal"}] ]
   }
   ```
 
