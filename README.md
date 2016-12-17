@@ -4,6 +4,7 @@ Babel plugin to transform class names into cssobj localized names, easily transf
 [![Join the chat at https://gitter.im/css-in-js/cssobj](https://badges.gitter.im/css-in-js/cssobj.svg)](https://gitter.im/css-in-js/cssobj)
 [![Build Status](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj-jsx.svg?branch=master)](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj-jsx)
 [![Coverage Status](https://coveralls.io/repos/github/cssobj/babel-plugin-transform-cssobj-jsx/badge.svg?branch=master)](https://coveralls.io/github/cssobj/babel-plugin-transform-cssobj-jsx?branch=master)
+[![npm](https://img.shields.io/npm/v/babel-plugin-transform-cssobj-jsx.svg "Version")](https://www.npmjs.com/package/cssobj)
 
 ## Usage
 
