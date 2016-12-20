@@ -76,7 +76,9 @@ You have two way to escape the transform
   }
   ```
 
-  Then you can use `makeLocal` instead of `mapClass`, as a alias property of cssobj result (it's **must not exists** in your scope)
+  Then you can use `makeLocal` instead of `mapClass`, as a alias property of cssobj result
+
+  **Notice**: `makeLocal` **must not exists** in result object to avoid conflict
 
   ```javascript
   // below will be transformed, using alias property
@@ -87,18 +89,22 @@ You have two way to escape the transform
   myObj.mapClass( <div className='abc'> )
   ```
 
-  Or, if you discard the cssobj result part, then the `mapName` is not alias, it's a real function (it **must exists** in your scope)
+## More about mapName
+
+  If you discard the cssobj result part, then the `mapName` is not alias, it's a real function
+
+  **Notice**: `makeLocal` **must exists** in your scope, it will be kept as real function
 
   ```javascript
   // makeLocal is not alias, it's have to be assigned
   const makeLocal = style.mapClass
 
-  // will inject to className prop
+  // will inject to className, shorter code
   makeLocal( <div className='nav'></div> )
   // <div className={ makeLocal('nav') }></div>
   ```
 
-  This feature is to keep the generated code optimized, both in bundle size and perf
+  See, all the className have a shorter code, that reduced the bundle size and have better pref
 
 ## TODO
 
