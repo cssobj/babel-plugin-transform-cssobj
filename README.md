@@ -48,9 +48,16 @@ Babel plugin to transform class names into cssobj localized names, easily transf
 
 ## More Usage
 
-  This plugin only transform the format: **result.mapClass(JSX)**
+  This plugin transform the below formats:
 
-  But if your existing code already has the form, .e.g:
+  - **result.mapClass(JSX)**
+
+  - **result.mapName(JSX)** (alias of result.mapClass)
+
+  - **mapName(JSX)** (function reference of result.mapClass)
+
+
+  If your existing code already has the form, .e.g:
 
   ```Javascript
   // existing code, you don't want below to transform
@@ -59,7 +66,7 @@ Babel plugin to transform class names into cssobj localized names, easily transf
 
 You have two way to escape the transform
 
-1. Transform the method call as `myObj['mapClass']`
+1. Change the original method call as `myObj['mapClass']`, that way this plugin don't touch it
 
 2. Pass **plugin option** `mapName` to use other name rather than `mapClass`
 
@@ -69,16 +76,29 @@ You have two way to escape the transform
   }
   ```
 
-  Then you can use `makeLocal` instead of `mapClass`
+  Then you can use `makeLocal` instead of `mapClass`, as a alias property of cssobj result (it's **must not exists** in your scope)
 
   ```javascript
-  // below will be transformed
-  style.makeLocal(<div className='nav'></div>
+  // below will be transformed, using alias property
+  style.makeLocal( <div className='nav'></div> )
+  // <div className={ style.mapClass('nav') }></div>
 
   // your existing code keep untouched
-  myObj.mapClass(<div className='abc'>)
+  myObj.mapClass( <div className='abc'> )
   ```
 
+  Or, if you discard the cssobj result part, then the `mapName` is not alias, it's a real function (it **must exists** in your scope)
+
+  ```javascript
+  // makeLocal is not alias, it's have to be assigned
+  const makeLocal = style.mapClass
+
+  // will inject to className prop
+  makeLocal( <div className='nav'></div> )
+  // <div className={ makeLocal('nav') }></div>
+  ```
+
+  This feature is to keep the generated code optimized, both in bundle size and perf
 
 ## TODO
 

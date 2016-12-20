@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-cssobj-jsx",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Babel plugin to transform class names into cssobj localized",
   "main": "index.js",
   "directories": {

@@ -12,11 +12,11 @@ module.exports = function (babel) {
           ? node.value.expression
           : node.value
       // transform ExpressionContainer to be result.mapClass(exp)
-      node.value = t.jSXExpressionContainer(
-        t.callExpression(
-          t.memberExpression(this.resultObj, t.identifier('mapClass')),
-          [exp]
-        )
+      var callee = t.isMemberExpression(this.callee)
+          ? t.memberExpression(this.callee.object, t.identifier('mapClass'))
+          : this.callee
+      node.value = t.jSXExpressionContainer (
+        t.callExpression(callee, [exp])
       )
     }
   }
@@ -25,15 +25,18 @@ module.exports = function (babel) {
     visitor: {
       CallExpression (path, state) {
         // get mapClass name from plugin options
-        var mapName = state.mapName || (state.opts && state.opts.mapName) || 'mapClass'
+        var mapName = state.mapName || (state.opts && state.opts.mapName)
         var callee = path.node.callee
         var args = path.node.arguments
-        // only this form: result.mapClass(JSX)
-        if(!callee.computed &&
-           t.isMemberExpression(callee) &&
-           t.isIdentifier(callee.property, {name: mapName}) &&
-           t.isJSXElement(args[0])) {
-          path.traverse(transformClassVisitor, { resultObj: callee.object })
+        // this form: result.mapClass(JSX)
+        // or this form: customName(JSX)
+        if((t.isMemberExpression(callee)
+            && !callee.computed
+            && t.isIdentifier(callee.property, {name: mapName || 'mapClass'})
+            ||
+            mapName && t.isIdentifier(callee, {name: mapName}))
+           && t.isJSXElement(args[0])) {
+          path.traverse(transformClassVisitor, { callee: callee, mapName: mapName })
           path.replaceWith(args[0])
         }
       }

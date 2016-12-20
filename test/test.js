@@ -61,4 +61,9 @@ describe('babel-plugin-transform-cssobj-jsx with mapName option', () => {
     const node = `var d= state.result().makeLocal(<div className={'a b c'}><p class={getClass()}>test</p></div>)`
     expect(lib(node)).to.equal(`var d = <div className={state.result().mapClass('a b c')}><p class={state.result().mapClass(getClass())}>test</p></div>;`)
   })
+
+  it('should accept makeLocal only, without result', () => {
+    const node = `var d= makeLocal(<div className={'a b c'}><p class={getClass()}>test</p></div>)`
+    expect(lib(node)).to.equal(`var d = <div className={makeLocal('a b c')}><p class={makeLocal(getClass())}>test</p></div>;`)
+  })
 })
