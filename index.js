@@ -1,5 +1,9 @@
 // Babel plugin to transform class names into cssobj localized
 
+var util = require('util')
+var yaml = require('js-yaml')
+var templateDelimiter = '_cssobj_template_delimiter_'
+
 module.exports = function (babel) {
   var t = babel.types
 
@@ -23,6 +27,45 @@ module.exports = function (babel) {
   return {
     inherits: require('babel-plugin-syntax-jsx'),
     visitor: {
+      Program(path){
+        // console.log(util.inspect(path, {showHidden: false, depth: 5}))
+      },
+      TaggedTemplateExpression (path, state) {
+        var source = path.scope.hub.file.code
+        var cssobjName = state.cssobjName || (state.opts && state.opts.cssobjName)
+        var node = path.node
+        var yamlRe = /\n\s*---\s*\n/
+        if(t.isIdentifier(node.tag, {name: 'CSSOBJ'})) {
+          var texts = node.quasi.quasis.map(function(v) {
+            return v.value.raw
+          })
+          var exps = node.quasi.expressions.map(function(v) {
+            return source.substring(v.start, v.end)
+          })
+          // it's cssobj template
+          if (texts[0].search(yamlRe)===0) {
+            // options parser
+            texts[0] = texts[0].replace(yamlRe, '')
+            var yamlArr = [], i, pos
+            for (i=0; i<texts.length; i++) {
+              pos = texts[i].search(/\n\s*---\s*\n/)
+              if(pos>-1) {
+                yamlArr.push(texts[i].substr(0, pos))
+                texts[i] = texts[i].substr(pos).replace(yamlRe, '')
+                break
+              } else {
+                yamlArr.push(texts[i])
+              }
+            }
+            var optionArr = JSON.stringify(yaml.load(yamlArr.join(templateDelimiter))).split('"'+templateDelimiter+'"')
+            var option = optionArr.map(function(v,i) {
+              if(i==optionArr.length-1) return v
+              return v + exps[i]
+            }).join('')
+            console.log(option, texts[i])
+          }
+        }
+      },
       CallExpression (path, state) {
         // get mapClass name from plugin options
         var mapName = state.mapName || (state.opts && state.opts.mapName)
