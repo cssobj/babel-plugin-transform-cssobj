@@ -4,6 +4,12 @@ var util = require('util')
 var yaml = require('js-yaml')
 var templateDelimiter = '_cssobj_template_delimiter_'
 
+function transformObjecctToFunction(babel, code) {
+  return babel.transform(code, {
+    plugins: ['./object-to-function']
+  }).code
+}
+
 module.exports = function (babel) {
   var t = babel.types
 
@@ -35,36 +41,44 @@ module.exports = function (babel) {
         var cssobjName = state.cssobjName || (state.opts && state.opts.cssobjName)
         var node = path.node
         var yamlRe = /\n\s*---\s*\n/
-        if(t.isIdentifier(node.tag, {name: 'CSSOBJ'})) {
-          var texts = node.quasi.quasis.map(function(v) {
-            return v.value.raw
-          })
-          var exps = node.quasi.expressions.map(function(v) {
-            return source.substring(v.start, v.end)
-          })
-          // it's cssobj template
-          if (texts[0].search(yamlRe)===0) {
-            // options parser
-            texts[0] = texts[0].replace(yamlRe, '')
-            var yamlArr = [], i, pos
-            for (i=0; i<texts.length; i++) {
-              pos = texts[i].search(/\n\s*---\s*\n/)
-              if(pos>-1) {
-                yamlArr.push(texts[i].substr(0, pos))
-                texts[i] = texts[i].substr(pos).replace(yamlRe, '')
-                break
-              } else {
-                yamlArr.push(texts[i])
+          if(t.isIdentifier(node.tag, {name: 'CSSOBJ'})) {
+            var texts = node.quasi.quasis.map(function(v) {
+              return v.value.raw
+            })
+            var exps = node.quasi.expressions.map(function(v) {
+              return source.substring(v.start, v.end)
+            })
+            // it's cssobj template
+            var i = 0, options
+            if (texts[0].search(yamlRe)===0) {
+              // options parser
+              texts[0] = texts[0].replace(yamlRe, '\n')
+              var yamlArr = [], pos
+              for (i=0; i<texts.length; i++) {
+                pos = texts[i].search(yamlRe)
+                if(pos>-1) {
+                  yamlArr.push(texts[i].substr(0, pos))
+                  texts[i] = texts[i].substr(pos).replace(yamlRe, '')
+                  break
+                } else {
+                  yamlArr.push(texts[i])
+                }
               }
+              options = yaml.load(yamlArr.join(templateDelimiter))
+              if(options) {
+                options = JSON.stringify(options)
+                  .split('"'+templateDelimiter+'"')
+                  .map(function(v,i,arr) {
+                    if(i==arr.length-1) return v
+                    return v + exps.shift()
+                  })
+                  .join('')
+              }
+              // console.log(yamlArr, options, 111, texts[i])
+              texts = texts.slice(i)
             }
-            var optionArr = JSON.stringify(yaml.load(yamlArr.join(templateDelimiter))).split('"'+templateDelimiter+'"')
-            var option = optionArr.map(function(v,i) {
-              if(i==optionArr.length-1) return v
-              return v + exps[i]
-            }).join('')
-            console.log(option, texts[i])
+            console.log(options, texts)
           }
-        }
       },
       CallExpression (path, state) {
         // get mapClass name from plugin options
