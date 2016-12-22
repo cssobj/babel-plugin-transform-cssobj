@@ -8,15 +8,17 @@ describe('transform-plugins', () => {
     }).code
   }
 
-  it('should transform plugins literal, should not transform non-literal', () => {
+  it('should transform plugins literal, should not transform keywords', () => {
     let node = `!{"plugins": [{'default-unit-234': 'px'}, {selector: abc}]}`
-    expect(lib(node)).to.equal(`import cssobj_plugin_default_unit_234 from 'cssobj-plugin-default-unit-234';
-!{ "plugins": [cssobj_plugin_default_unit_234('px'), { selector: abc }] };`)
+    expect(lib(node)).to.equal(`!{ "plugins": [cssobj_plugin_default_unit_234('px'), { selector: abc }] };`)
 
     node = `!{"plugins": [{'default-unit-234': 'px'}, {'localize': {space:'_my_'}}]}`
-    expect(lib(node)).to.equal(`import cssobj_plugin_localize from 'cssobj-plugin-localize';
-import cssobj_plugin_default_unit_234 from 'cssobj-plugin-default-unit-234';
-!{ "plugins": [cssobj_plugin_default_unit_234('px'), cssobj_plugin_localize({ space: '_my_' })] };`)
+    expect(lib(node)).to.equal(`!{ "plugins": [cssobj_plugin_default_unit_234('px'), cssobj_plugin_localize({ space: '_my_' })] };`)
+  })
+
+  it('should transform plugins literal without options', () => {
+    let node = `!{"plugins": [{'default-unit-234': 'px'}, 'flexbox']}`
+    expect(lib(node)).to.equal(`!{ "plugins": [cssobj_plugin_default_unit_234('px'), cssobj_plugin_flexbox()] };`)
   })
 
   it('should work with empty or non-plugins', () => {

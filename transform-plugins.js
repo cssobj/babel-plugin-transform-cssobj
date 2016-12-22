@@ -1,3 +1,5 @@
+// transform from object into cssobj config, with plugins transformed
+
 module.exports = function (babel) {
   var t = babel.types
 
@@ -14,8 +16,9 @@ module.exports = function (babel) {
         // get target expression
         var node = firstExp.expression.argument
         // get "plugins" prop, it's from JSON.stringify
+
         var pluginsNode = node.properties.filter(function(v) {
-          return t.isLiteral(v.key, {value: 'plugins'})
+          return getKeyValue(v, 'plugins')
             && t.isArrayExpression(v.value)
         }).shift()
 
@@ -24,16 +27,16 @@ module.exports = function (babel) {
           // only transform literal keys with plugin names
           var elements = pluginsNode.value.elements
           var cssobjImports = path.node.cssobjImports = []
-          for (var v, i = 0; i < elements.length; i++) {
+          for (var v, prop, value, i = 0; i < elements.length; i++) {
             v = elements[i]
-            if (t.isObjectExpression(v)
+            if (t.isLiteral(v) && (value='', prop = v.value)
+                || t.isObjectExpression(v)
                 && v.properties.length == 1
-                && t.isLiteral(v.properties[0].key)
+                && (prop = getKeyValue(v.properties[0]))
                 // plugin name cannot be below keywords
-                && ['selector', 'value', 'post'].indexOf(v.properties[0].key.value) < 0) {
-              var prop = v.properties[0].key.value
+                && ['selector', 'value', 'post'].indexOf(prop) < 0
+                && (value = v.properties[0].value)) {
               var pluginIden = 'cssobj_plugin_' + prop.replace(/-/g, '_')
-              var value = v.properties[0].value
               elements[i] = t.callExpression(
                 t.identifier(pluginIden),
                 value ? [value] : []
@@ -49,4 +52,10 @@ module.exports = function (babel) {
       }
     }
   }
+
+  function getKeyValue (v, name) {
+    if (t.isLiteral(v.key, name ? {value: name}: {})) return v.key.value
+    if (t.isIdentifier(v.key, name ? {name: name}: {})) return v.key.name
+  }
+
 }
