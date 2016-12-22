@@ -89,10 +89,10 @@ module.exports = function (babel) {
             // got css object
             // console.log(objStr)
             var cssobjNS = option.names['cssobj']
-            var cssobjName = cssobjNS.name || 'cssobj'
+            var cssobjName = cssobjNS.name
             root.path.unshiftContainer('body', t.importDeclaration(
               [t.importDefaultSpecifier(t.identifier(cssobjName))],
-              t.stringLiteral(cssobjNS.path || 'cssobj')
+              t.stringLiteral(cssobjNS.path)
             ))
 
             path.replaceWithSourceString(`${cssobjName} (${config}, ${objStr})`)

@@ -158,6 +158,54 @@ var d = cssobj({}, {
 
 })
 
+describe('babel-plugin-transform-cssobj with custom name', () => {
+  var lib  = function (code) {
+    return transform(code, {
+      plugins: [[
+        './index',
+        {
+          names: {
+            cssobj: {
+              name: 'abc',
+              path: './cssobj'
+            },
+            'default-unit': {
+              name: 'unit',
+              path: './unit'
+            },
+            flexbox: {
+              name: 'box',
+            }
+          }
+        }
+      ]]
+    }).code
+  }
+
+  it('should work with custom cssobj name', function() {
+    let node = `CSSOBJ\`\``
+    expect(lib(node)).equal(`import abc from "./cssobj";
+abc({}, {});`)
+  })
+
+  it('should work with custom plugin name', function() {
+    let node = `CSSOBJ\`
+---
+plugins:
+  - default-unit
+  - flexbox
+---
+\``
+    expect(lib(node)).equal(`import abc from "./cssobj";
+import unit from "./unit";
+import box from "cssobj-plugin-flexbox";
+abc({
+  plugins: [unit(), box()]
+}, {});`)
+  })
+
+})
+
 
 describe('babel-plugin-transform-cssobj-jsx', () => {
   var lib  = function (code) {
