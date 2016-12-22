@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cssobj/babel-plugin-transform-cssobj-jsx.git"
+    "url": "git+https://github.com/cssobj/babel-plugin-transform-cssobj.git"
   },
   "keywords": [
     "babel",
@@ -32,12 +32,11 @@
   "author": "James Yang <jamesyang999@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cssobj/babel-plugin-transform-cssobj-jsx/issues"
+    "url": "https://github.com/cssobj/babel-plugin-transform-cssobj/issues"
   },
-  "homepage": "https://github.com/cssobj/babel-plugin-transform-cssobj-jsx#readme",
+  "homepage": "https://github.com/cssobj/babel-plugin-transform-cssobj#readme",
   "devDependencies": {
     "babel-core": "^6.21.0",
-    "babel-plugin-transform-es2015-modules-umd": "^6.18.0",
     "chai": "^3.5.0",
     "coveralls": "^2.11.15",
     "gulp": "^3.9.1",

@@ -136,6 +136,21 @@ You have two way to escape the transform
 
   See, all the className have a shorter code, that reduced the bundle size and have better pref
 
+## Option for import names
+
+  Normally the default import name of `import cssobj from 'cssobj'` declear should be ok, but if the `cssobj` have conflicts, pass below option in `.babelrc`
+
+  ```json
+  {
+    "plugins": [ ["transform-cssobj",
+    {
+    "mapName": "makeLocal",
+    "tag": "MYTAG",
+    "names": {"cssobj": {"name": "_cssobj", "path": "./cssobj"}}
+    } ] ]
+  }
+  ```
+
 ## TODO
 
  - [ ] Support JSX Spread
