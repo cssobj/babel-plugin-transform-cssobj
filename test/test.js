@@ -12,7 +12,7 @@ describe('transform-plugins', () => {
     let node = `!{"plugins": [{'default-unit-234': 'px'}, {selector: abc}]}`
     expect(lib(node)).to.equal(`!{ "plugins": [cssobj_plugin_default_unit_234('px'), { selector: abc }] };`)
 
-    node = `!{"plugins": [{'default-unit-234': 'px'}, {'localize': {space:'_my_'}}]}`
+    node = `!{"plugins": [{'default-unit-234': 'px'}, {localize: {space:'_my_'}}]}`
     expect(lib(node)).to.equal(`!{ "plugins": [cssobj_plugin_default_unit_234('px'), cssobj_plugin_localize({ space: '_my_' })] };`)
   })
 
@@ -29,7 +29,135 @@ describe('transform-plugins', () => {
     node = `!{"plugins": {abc: 'def'}}`
     expect(lib(node)).to.equal(`!{ "plugins": { abc: 'def' } };`)
   })
+
+  it('should not transform with normal exp', () => {
+    let node = `var d = { "plugins": [{ 'default-unit-234': 'px' }, 'flexbox'] };`
+    expect(lib(node)).to.equal(node)
+  })
+
+  it('should not transform with function in array', () => {
+    let node = `!{ "plugins": [{ 'default-unit-234': 'px' }, console.log, {[Symbol()]: 1234} ] };`
+    expect(lib(node)).to.equal(`!{ "plugins": [cssobj_plugin_default_unit_234('px'), console.log, { [Symbol()]: 1234 }] };`)
+  })
+
 })
+
+describe('babel-plugin-transform-cssobj with templateLiteral', () => {
+  var lib  = function (code) {
+    return transform(code, {
+      plugins: ['./index']
+    }).code
+  }
+
+  it('should work with empty string', function() {
+    let node = `
+var getUnit = v=>v
+var d= CSSOBJ\`
+---
+plugins:
+  - default-unit: $\{getUnit()\}
+  - default-unit-2: px
+  - default-unit-3
+  - flexbox:
+      pref: 1234
+      abc: def
+---
+body{color: red;}
+body{color: ${v=>v};}
+body{font-size: 234;}
+\`
+`
+    expect(lib(node)).to.equal(`import cssobj from "cssobj";
+import cssobj_plugin_default_unit from "cssobj-plugin-default-unit";
+import cssobj_plugin_default_unit_2 from "cssobj-plugin-default-unit-2";
+import cssobj_plugin_default_unit_3 from "cssobj-plugin-default-unit-3";
+import cssobj_plugin_flexbox from "cssobj-plugin-flexbox";
+
+var getUnit = v => v;
+var d = cssobj({
+  plugins: [cssobj_plugin_default_unit(getUnit()), cssobj_plugin_default_unit_2('px'), cssobj_plugin_default_unit_3(), cssobj_plugin_flexbox({
+    pref: 1234,
+    abc: 'def'
+  })]
+}, {
+  body: [{
+    color: 'red'
+  }, {
+    color: 'v=>v'
+  }, {
+    fontSize: 234
+  }]
+});`)
+  })
+
+  it('should work with empty string', function() {
+    let node = 'CSSOBJ``'
+    expect(lib(node)).to.equal(`import cssobj from "cssobj";
+cssobj({}, {});`)
+  })
+
+  it('should work with only config', function() {
+    let node = `
+CSSOBJ\`
+---
+plugins:
+  - default-unit: px
+  - flexbox
+---
+\``
+    expect(lib(node)).to.equal(`import cssobj from "cssobj";
+import cssobj_plugin_default_unit from "cssobj-plugin-default-unit";
+import cssobj_plugin_flexbox from "cssobj-plugin-flexbox";
+
+cssobj({
+  plugins: [cssobj_plugin_default_unit('px'), cssobj_plugin_flexbox()]
+}, {});`)
+  })
+
+  it('should work with no config', function() {
+    let node = `
+var d = CSSOBJ\`
+body { color: $\{getColor()\}; }
+.p1 { color: blue; font-size: 12px; }
+\`
+`
+    expect(lib(node)).to.equal(`import cssobj from "cssobj";
+
+var d = cssobj({}, {
+  body: {
+    color: getColor()
+  },
+  '.p1': {
+    color: 'blue',
+    fontSize: '12px'
+  }
+});`)
+
+        node = `
+var d = CSSOBJ\`
+---
+---
+body {color: red;}
+\`
+`
+    expect(lib(node)).equal(`import cssobj from "cssobj";
+
+var d = cssobj({}, {
+  body: {
+    color: 'red'
+  }
+});`)
+  })
+
+  it('should not change other templateLiteral', function() {
+    let node = 'var d= test`body{color: red;}`'
+    // only format changed, code no change
+    expect(lib(node)).equal('var d = test`body{color: red;}`;')
+  })
+
+
+})
+
 
 describe('babel-plugin-transform-cssobj-jsx', () => {
   var lib  = function (code) {
@@ -97,3 +225,5 @@ describe('babel-plugin-transform-cssobj-jsx with mapName option', () => {
     expect(lib(node)).to.equal(`var d = <div className={makeLocal('a b c')}><p class={makeLocal(getClass())}>test</p></div>;`)
   })
 })
+
+

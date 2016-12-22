@@ -27,7 +27,7 @@ module.exports = function (babel) {
         var source = root.code
         var cssobjName = state.cssobjName || (state.opts && state.opts.cssobjName)
         var node = path.node
-        // console.log(path)
+        // console.log(node)
         var yamlRe = /\n\s*---\s*\n/
           if (t.isIdentifier(node.tag, {name: 'CSSOBJ'})) {
             var texts = node.quasi.quasis.map(function (v) {
