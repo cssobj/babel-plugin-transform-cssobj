@@ -1,35 +1,22 @@
 // Babel plugin to transform class names into cssobj localized
 
 var util = require('util')
+var converter = require('cssobj-converter')
 var yaml = require('js-yaml')
 var templateDelimiter = '_cssobj_template_delimiter_'
 
 function transformObjecctToFunction(babel, code) {
-  return babel.transform(code, {
-    plugins: ['./object-to-function']
-  }).code
+  var result = babel.transform('!'+code, {
+    plugins: ['./transform-plugins']
+  })
+  console.log(result.code)
+  // .cssobjConfig, cssobjImports
+  return result.ast.program
 }
 
 module.exports = function (babel) {
   var t = babel.types
 
-  var transformClassVisitor = {
-    JSXAttribute (path) {
-      var node = path.node
-      if (!node.name || !node.value || ['className', 'class'].indexOf(node.name.name)<0) return
-      // get the right mapClass arguments
-      var exp = t.isJSXExpressionContainer(node.value)
-          ? node.value.expression
-          : node.value
-      // transform ExpressionContainer to be result.mapClass(exp)
-      var callee = t.isMemberExpression(this.callee)
-          ? t.memberExpression(this.callee.object, t.identifier('mapClass'))
-          : this.callee
-      node.value = t.jSXExpressionContainer (
-        t.callExpression(callee, [exp])
-      )
-    }
-  }
   return {
     inherits: require('babel-plugin-syntax-jsx'),
     visitor: {
@@ -37,9 +24,10 @@ module.exports = function (babel) {
         // console.log(util.inspect(path, {showHidden: false, depth: 5}))
       },
       TaggedTemplateExpression (path, state) {
-        var source = path.scope.hub.file.code
+        var source = path.hub.file.code
         var cssobjName = state.cssobjName || (state.opts && state.opts.cssobjName)
         var node = path.node
+        // console.log(path)
         var yamlRe = /\n\s*---\s*\n/
           if(t.isIdentifier(node.tag, {name: 'CSSOBJ'})) {
             var texts = node.quasi.quasis.map(function(v) {
@@ -49,9 +37,9 @@ module.exports = function (babel) {
               return source.substring(v.start, v.end)
             })
             // it's cssobj template
-            var i = 0, options
+            var i = 0, cssobjConfig, cssobjConfigNode
             if (texts[0].search(yamlRe)===0) {
-              // options parser
+              // config parser
               texts[0] = texts[0].replace(yamlRe, '\n')
               var yamlArr = [], pos
               for (i=0; i<texts.length; i++) {
@@ -64,20 +52,32 @@ module.exports = function (babel) {
                   yamlArr.push(texts[i])
                 }
               }
-              options = yaml.load(yamlArr.join(templateDelimiter))
-              if(options) {
-                options = JSON.stringify(options)
-                  .split('"'+templateDelimiter+'"')
+              cssobjConfig = yaml.load(yamlArr.join(templateDelimiter))
+              if(cssobjConfig) {
+                cssobjConfig = util.inspect(cssobjConfig, {depth:null})
+                  .split('\''+templateDelimiter+'\'')
                   .map(function(v,i,arr) {
                     if(i==arr.length-1) return v
                     return v + exps.shift()
                   })
                   .join('')
+                cssobjConfigNode = transformObjecctToFunction(babel, cssobjConfig)
+                path.hub.file.path.unshiftContainer('body', cssobjConfigNode.cssobjImports)
               }
-              // console.log(yamlArr, options, 111, texts[i])
+              // console.log(yamlArr, config, 111, texts[i])
               texts = texts.slice(i)
             }
-            console.log(options, texts)
+
+            // css object transform
+            var obj = converter(texts.join(templateDelimiter))
+            var objStr = util.inspect(obj, {depth: null})
+                .split('\''+templateDelimiter+'\'')
+                .map(function(v,i,arr) {
+                  if(i==arr.length-1) return v
+                  return v + exps.shift()
+                })
+                .join('')
+            console.log(objStr)
           }
       },
       CallExpression (path, state) {
@@ -99,4 +99,23 @@ module.exports = function (babel) {
       }
     }
   }
+
+  var transformClassVisitor = {
+    JSXAttribute (path) {
+      var node = path.node
+      if (!node.name || !node.value || ['className', 'class'].indexOf(node.name.name)<0) return
+      // get the right mapClass arguments
+      var exp = t.isJSXExpressionContainer(node.value)
+        ? node.value.expression
+        : node.value
+      // transform ExpressionContainer to be result.mapClass(exp)
+      var callee = t.isMemberExpression(this.callee)
+        ? t.memberExpression(this.callee.object, t.identifier('mapClass'))
+        : this.callee
+      node.value = t.jSXExpressionContainer (
+        t.callExpression(callee, [exp])
+      )
+    }
+  }
+
 }

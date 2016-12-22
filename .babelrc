@@ -1,4 +1,4 @@
 {
-  "plugins": ["./transform-plugins"],
+  "plugins": ["./index"],
   "ignore": ["node_modules"]
 }
