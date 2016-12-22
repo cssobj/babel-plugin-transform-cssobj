@@ -75,11 +75,6 @@ import cssobj_plugin_flexbox from "cssobj-plugin-flexbox";
 
 var getUnit = v => v;
 var d = cssobj({
-  plugins: [cssobj_plugin_default_unit(getUnit()), cssobj_plugin_default_unit_2('px'), cssobj_plugin_default_unit_3(), cssobj_plugin_flexbox({
-    pref: 1234,
-    abc: 'def'
-  })]
-}, {
   body: [{
     color: 'red'
   }, {
@@ -87,6 +82,11 @@ var d = cssobj({
   }, {
     fontSize: 234
   }]
+}, {
+  plugins: [cssobj_plugin_default_unit(getUnit()), cssobj_plugin_default_unit_2('px'), cssobj_plugin_default_unit_3(), cssobj_plugin_flexbox({
+    pref: 1234,
+    abc: 'def'
+  })]
 });`)
   })
 
@@ -109,9 +109,9 @@ plugins:
 import cssobj_plugin_default_unit from "cssobj-plugin-default-unit";
 import cssobj_plugin_flexbox from "cssobj-plugin-flexbox";
 
-cssobj({
+cssobj({}, {
   plugins: [cssobj_plugin_default_unit('px'), cssobj_plugin_flexbox()]
-}, {});`)
+});`)
   })
 
   it('should work with no config', function() {
@@ -123,7 +123,7 @@ body { color: $\{getColor()\}; }
 `
     expect(lib(node)).to.equal(`import cssobj from "cssobj";
 
-var d = cssobj({}, {
+var d = cssobj({
   body: {
     color: getColor()
   },
@@ -131,7 +131,7 @@ var d = cssobj({}, {
     color: 'blue',
     fontSize: '12px'
   }
-});`)
+}, {});`)
 
         node = `
 var d = CSSOBJ\`
@@ -142,11 +142,11 @@ body {color: red;}
 `
     expect(lib(node)).equal(`import cssobj from "cssobj";
 
-var d = cssobj({}, {
+var d = cssobj({
   body: {
     color: 'red'
   }
-});`)
+}, {});`)
   })
 
   it('should not change other templateLiteral', function() {
@@ -200,9 +200,9 @@ plugins:
     expect(lib(node)).equal(`import abc from "./cssobj";
 import unit from "./unit";
 import box from "cssobj-plugin-flexbox";
-abc({
+abc({}, {
   plugins: [unit(), box()]
-}, {});`)
+});`)
   })
 
 })

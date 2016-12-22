@@ -1,7 +1,7 @@
 {
-  "name": "babel-plugin-transform-cssobj-jsx",
-  "version": "2.1.0",
-  "description": "Babel plugin to transform class names into cssobj localized",
+  "name": "babel-plugin-transform-cssobj",
+  "version": "3.0.1",
+  "description": "Babel plugin to transform css into cssobj (CSS in JS engine), map class names into cssobj localized names",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -36,6 +36,7 @@
   "homepage": "https://github.com/cssobj/babel-plugin-transform-cssobj-jsx#readme",
   "devDependencies": {
     "babel-core": "^6.21.0",
+    "babel-plugin-transform-es2015-modules-umd": "^6.18.0",
     "chai": "^3.5.0",
     "coveralls": "^2.11.15",
     "gulp": "^3.9.1",
@@ -46,6 +47,6 @@
   "dependencies": {
     "babel-plugin-syntax-jsx": "^6.18.0",
     "cssobj-converter": "*",
-    "objutil": "^2.0.6"
+    "objutil": "^2.0.7"
   }
 }

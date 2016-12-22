@@ -96,7 +96,7 @@ module.exports = function (babel) {
               t.stringLiteral(cssobjNS.path)
             ))
 
-            path.replaceWithSourceString(`${cssobjName} (${config}, ${objStr})`)
+            path.replaceWithSourceString(`${cssobjName} (${objStr}, ${config})`)
           }
       },
       CallExpression (path, state) {

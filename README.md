@@ -1,33 +1,42 @@
-# babel-plugin-transform-cssobj-jsx
-Babel plugin to transform class names into cssobj localized names, easily transform existing code into cssobj.
+# babel-plugin-transform-cssobj
+Babel plugin to transform css into cssobj (CSS in JS solution), map class names into cssobj localized names
 
 [![Join the chat at https://gitter.im/css-in-js/cssobj](https://badges.gitter.im/css-in-js/cssobj.svg)](https://gitter.im/css-in-js/cssobj)
-[![Build Status](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj-jsx.svg?branch=master)](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj-jsx)
-[![Coverage Status](https://coveralls.io/repos/github/cssobj/babel-plugin-transform-cssobj-jsx/badge.svg?branch=master)](https://coveralls.io/github/cssobj/babel-plugin-transform-cssobj-jsx?branch=master)
-[![npm](https://img.shields.io/npm/v/babel-plugin-transform-cssobj-jsx.svg "Version")](https://www.npmjs.com/package/cssobj)
+[![Build Status](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj.svg?branch=master)](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj)
+[![Coverage Status](https://coveralls.io/repos/github/cssobj/babel-plugin-transform-cssobj/badge.svg?branch=master)](https://coveralls.io/github/cssobj/babel-plugin-transform-cssobj?branch=master)
+[![npm](https://img.shields.io/npm/v/babel-plugin-transform-cssobj.svg "Version")](https://www.npmjs.com/package/cssobj)
 
 ## Usage
 
 1. Install
 
   ``` bash
-  npm install --save-dev babel-plugin-transform-cssobj-jsx
+  npm install --save-dev babel-plugin-transform-cssobj
   ```
 
 2. In your `.babelrc`:
 
   ``` json
   {
-    "plugins": ["transform-cssobj-jsx"]
+    "plugins": ["transform-cssobj"]
   }
   ```
 
-3. **Wrap your JSX in result.mapClass()**
+3. **Write CSS as normal, Wrap JSX in result.mapClass()**
 
     ``` javascript
-    const style = cssobj(obj)
+    const result = CSSOBJ`
+    ---
+    plugins:
+      - default-unit: px
+      - flexbox
+    ---
+    body { color: red; font-size:12 }
+    .container { display: flex; height: ${ getWindowHeight() }; }
+    .item { flex: 1; width: 100; height: ${ v=> v.prev + 1 } }
+    `
 
-    const html = style.mapClass(
+    const html = result.mapClass(
       <div className='container'>
         <div className={func()}>
         <p className='!news item active'> </p></div></div>
@@ -37,6 +46,27 @@ Babel plugin to transform class names into cssobj localized names, easily transf
     Which transform into below code:
 
     ``` javascript
+    import cssobj from "cssobj";
+    import cssobj_plugin_default_unit from "cssobj-plugin-default-unit";
+    import cssobj_plugin_flexbox from "cssobj-plugin-flexbox";
+    const result = cssobj({
+      plugins: [cssobj_plugin_default_unit('px'), cssobj_plugin_flexbox()]
+    }, {
+        body: {
+            color: 'red',
+            fontSize: 12
+        },
+        '.container': {
+            display: 'flex',
+            height: getWindowHeight()
+        },
+        '.item': {
+            flex: 1,
+            width: 100,
+            height: v => v.prev + 1
+        }
+    });
+
     const html = (
       <div className={style.mapClass('container')}>
         <div className={style.mapClass(func())}>
@@ -72,7 +102,7 @@ You have two way to escape the transform
 
   ``` json
   {
-    "plugins": [ ["transform-cssobj-jsx", {"mapName": "makeLocal"}] ]
+    "plugins": [ ["transform-cssobj", {"mapName": "makeLocal"}] ]
   }
   ```
 

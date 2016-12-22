@@ -1,4 +1,4 @@
 {
-  "plugins": ["./index"],
+  "plugins": ["./index", "add-module-exports"],
   "ignore": ["node_modules"]
 }
