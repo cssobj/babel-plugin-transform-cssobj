@@ -1,14 +1,14 @@
 {
   "name": "babel-plugin-transform-cssobj",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Babel plugin to transform css into cssobj (CSS in JS engine), map class names into cssobj localized names",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "files": [
-    "*.js",
-    "*.md"
+    "index.js",
+    "transform-plugins.js"
   ],
   "scripts": {
     "objutil": "rollup -c ./node_modules/objutil/rollup.config.js --api defaults",
@@ -47,6 +47,7 @@
   "dependencies": {
     "babel-plugin-syntax-jsx": "^6.18.0",
     "cssobj-converter": "*",
+    "js-yaml": "*",
     "objutil": "^2.0.7"
   }
 }

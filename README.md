@@ -146,6 +146,7 @@ You have two way to escape the transform
     {
     "mapName": "makeLocal",
     "tag": "MYTAG",
+    "format": "less",
     "names": {"cssobj": {"name": "_cssobj", "path": "./cssobj"}}
     } ] ]
   }

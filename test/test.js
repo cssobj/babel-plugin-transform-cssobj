@@ -117,19 +117,21 @@ cssobj({}, {
   it('should work with no config', function() {
     let node = `
 var d = CSSOBJ\`
-body { color: $\{getColor()\}; }
-.p1 { color: blue; font-size: 12px; }
+body {
+  color: $\{getColor()\};
+  .p1 { color: blue; font-size: 12px; }
+}
 \`
 `
     expect(lib(node)).to.equal(`import cssobj from "cssobj";
 
 var d = cssobj({
   body: {
-    color: getColor()
-  },
-  '.p1': {
-    color: 'blue',
-    fontSize: '12px'
+    color: getColor(),
+    '.p1': {
+      color: 'blue',
+      fontSize: '12px'
+    }
   }
 }, {});`)
 

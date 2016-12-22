@@ -31,6 +31,7 @@ module.exports = function (babel) {
         var option = state.opts // babel5: state===opts
         option = objutil.defaults(option, {
           tag: 'CSSOBJ',
+          format: 'scss',
           names: {
             cssobj: {name: 'cssobj', path: 'cssobj'}
           }
@@ -79,7 +80,7 @@ module.exports = function (babel) {
             }
 
             // css object transform
-            var obj = converter(texts.join(templateDelimiter))
+            var obj = converter(texts.join(templateDelimiter), option.format)
             var objStr = util.inspect(obj, {depth: null})
               .split('\'' + templateDelimiter + '\'')
               .map(function (v, i, arr) {
