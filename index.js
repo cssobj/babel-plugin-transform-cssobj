@@ -1,13 +1,19 @@
 // Babel plugin to transform class names into cssobj localized
 
+// imports
 var util = require('util')
 var converter = require('cssobj-converter')
 var yaml = require('js-yaml')
+var objutil = require('objutil')
+var syntaxJsx = require('babel-plugin-syntax-jsx')
+
+// constants
 var templateDelimiter = '_cssobj_template_delimiter_'
 
-function transformObjecctToFunction (babel, code) {
+// helpers
+function transformObjecctToFunction (babel, code, option) {
   var result = babel.transform('!' + code, {
-    plugins: ['./transform-plugins']
+    plugins: [['./transform-plugins', option]]
   })
   // console.log(result.code)
   // result.ast.program have: .cssobjConfig, .cssobjImports
@@ -17,15 +23,17 @@ function transformObjecctToFunction (babel, code) {
 module.exports = function (babel) {
   var t = babel.types
   return {
-    inherits: require('babel-plugin-syntax-jsx'),
+    inherits: syntaxJsx,
     visitor: {
-      Program (path) {
-        // console.log(util.inspect(path, {showHidden: false, depth: 5}))
-      },
       TaggedTemplateExpression (path, state) {
         var root = path.hub.file
         var source = root.code
-        var cssobjName = state.cssobjName || (state.opts && state.opts.cssobjName)
+        var option = state.opts // babel5: state===opts
+        option = objutil.defaults(option, {
+          names: {
+            cssobj: {name: 'cssobj', path: 'cssobj'}
+          }
+        })
         var node = path.node
         // console.log(node)
         var yamlRe = /\n\s*---\s*\n/
@@ -61,7 +69,7 @@ module.exports = function (babel) {
                     return v + exps.shift()
                   })
                   .join('')
-                cssobjConfigNode = transformObjecctToFunction(babel, cssobjConfig)
+                cssobjConfigNode = transformObjecctToFunction(babel, cssobjConfig, option)
                 root.path.unshiftContainer('body', cssobjConfigNode.ast.program.cssobjImports)
                 config = cssobjConfigNode.code.substr(1).replace(/;+$/, '')
               }
@@ -80,12 +88,14 @@ module.exports = function (babel) {
               .join('')
             // got css object
             // console.log(objStr)
+            var cssobjNS = option.names['cssobj']
+            var cssobjName = cssobjNS.name || 'cssobj'
             root.path.unshiftContainer('body', t.importDeclaration(
-              [t.importDefaultSpecifier(t.identifier('cssobj'))],
-              t.stringLiteral('cssobj')
+              [t.importDefaultSpecifier(t.identifier(cssobjName))],
+              t.stringLiteral(cssobjNS.path || 'cssobj')
             ))
 
-            path.replaceWithSourceString(`cssobj(${config}, ${objStr})`)
+            path.replaceWithSourceString(`${cssobjName} (${config}, ${objStr})`)
           }
       },
       CallExpression (path, state) {

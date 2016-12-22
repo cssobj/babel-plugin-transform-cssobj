@@ -10,6 +10,9 @@
     "index.js"
   ],
   "scripts": {
+    "objutil": "rollup -c ./node_modules/objutil/rollup.config.js --api defaults",
+    "build": "npm run objutil",
+    "pretest": "npm run build",
     "test": "istanbul cover _mocha",
     "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
@@ -42,6 +45,7 @@
   },
   "dependencies": {
     "babel-plugin-syntax-jsx": "^6.18.0",
-    "cssobj-converter": "^2.1.6"
+    "cssobj-converter": "*",
+    "objutil": "^2.0.6"
   }
 }
