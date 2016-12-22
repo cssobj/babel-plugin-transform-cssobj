@@ -30,6 +30,7 @@ module.exports = function (babel) {
         var source = root.code
         var option = state.opts // babel5: state===opts
         option = objutil.defaults(option, {
+          tag: 'CSSOBJ',
           names: {
             cssobj: {name: 'cssobj', path: 'cssobj'}
           }
@@ -37,7 +38,7 @@ module.exports = function (babel) {
         var node = path.node
         // console.log(node)
         var yamlRe = /\n\s*---\s*\n/
-          if (t.isIdentifier(node.tag, {name: 'CSSOBJ'})) {
+          if (t.isIdentifier(node.tag, {name: option.tag})) {
             var texts = node.quasi.quasis.map(function (v) {
               return v.value.raw
             })

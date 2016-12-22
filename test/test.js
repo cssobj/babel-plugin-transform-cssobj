@@ -164,6 +164,7 @@ describe('babel-plugin-transform-cssobj with custom name', () => {
       plugins: [[
         './index',
         {
+          tag: 'MYTAG',
           names: {
             cssobj: {
               name: 'abc',
@@ -183,13 +184,13 @@ describe('babel-plugin-transform-cssobj with custom name', () => {
   }
 
   it('should work with custom cssobj name', function() {
-    let node = `CSSOBJ\`\``
+    let node = `MYTAG\`\``
     expect(lib(node)).equal(`import abc from "./cssobj";
 abc({}, {});`)
   })
 
   it('should work with custom plugin name', function() {
-    let node = `CSSOBJ\`
+    let node = `MYTAG\`
 ---
 plugins:
   - default-unit
