@@ -18,7 +18,7 @@ module.exports = function (babel) {
         // get "plugins" prop, it's from JSON.stringify
 
         var pluginsNode = node.properties.filter(function(v) {
-          return getKeyValue(v, 'plugins')
+          return getKeyValue(v) === 'plugins'
             && t.isArrayExpression(v.value)
         }).shift()
 
@@ -53,9 +53,9 @@ module.exports = function (babel) {
     }
   }
 
-  function getKeyValue (v, name) {
-    if (t.isLiteral(v.key, name ? {value: name}: {})) return v.key.value
-    if (t.isIdentifier(v.key, name ? {name: name}: {})) return v.key.name
+  function getKeyValue (v) {
+    if (t.isLiteral(v.key)) return v.key.value
+    if (t.isIdentifier(v.key)) return v.key.name
   }
 
 }
