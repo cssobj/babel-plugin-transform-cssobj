@@ -26,52 +26,72 @@ Babel plugin to transform css into cssobj (CSS in JS solution), map class names 
 
     ``` javascript
     const result = CSSOBJ`
+
     ---
+    # YAML as config
     plugins:
       - default-unit: px
       - flexbox
     ---
-    body { color: red; font-size:12 }
-    .container { display: flex; height: ${ getWindowHeight() }; }
-    .item { flex: 1; width: 100; height: ${ v=> v.prev + 1 } }
+
+    // support inline comment in style
+    body { color: red; font-size:12; }
+
+    .container {
+      display: flex;
+      height: ${ getWindowHeight() };
+
+      // nest selector
+      .item {
+        flex: 1; width: 100; height: ${ v=> v.prev ? v.prev + 1 : 200 };
+        a {
+          color: red;
+          &:hover { color: blue; }
+        }
+      }
+    }
     `
 
     const html = result.mapClass(
-      <div className='container'>
-        <div className={func()}>
-        <p className='!news item active'> </p></div></div>
+      <div class='container'>
+        <div class='item'>
+        <a class='!news item active'>link text</a></div></div>
     )
     ```
 
     Which transform into below code:
 
     ``` javascript
-    import cssobj from "cssobj";
-    import cssobj_plugin_default_unit from "cssobj-plugin-default-unit";
-    import cssobj_plugin_flexbox from "cssobj-plugin-flexbox";
+    import cssobj from 'cssobj';
+    import cssobj_plugin_default_unit from 'cssobj-plugin-default-unit';
+    import cssobj_plugin_flexbox from 'cssobj-plugin-flexbox';
     const result = cssobj({
-      plugins: [cssobj_plugin_default_unit('px'), cssobj_plugin_flexbox()]
-    }, {
-        body: {
-            color: 'red',
-            fontSize: 12
-        },
-        '.container': {
-            display: 'flex',
-            height: getWindowHeight()
-        },
+      body: {
+        color: 'red',
+        fontSize: 12
+      },
+      '.container': {
+        display: 'flex',
+        height: getWindowHeight(),
         '.item': {
-            flex: 1,
-            width: 100,
-            height: v => v.prev + 1
+          flex: 1,
+          width: 100,
+          height: v => v.prev ? v.prev + 1 : 200,
+          a: {
+            color: 'red',
+            '&:hover': {
+              color: 'blue'
+            }
+          }
         }
+      }
+    }, {
+      plugins: [cssobj_plugin_default_unit('px'), cssobj_plugin_flexbox()]
     });
 
-    const html = (
-      <div className={style.mapClass('container')}>
-        <div className={style.mapClass(func())}>
-        <p className={style.mapClass('!news item active')}> </p></div></div>
-    )
+    const html = <div class={result.mapClass('container')}>
+            <div class={result.mapClass('item')}>
+            <a class={result.mapClass('!news item active')}>link text</a></div></div>;
     ```
 
   **Note**: According to **cssobj** `mapClass` rule, the `!news` will become `news` and not localized (aka keep AS IS).
