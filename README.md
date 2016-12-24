@@ -1,5 +1,5 @@
 # babel-plugin-transform-cssobj
-Babel plugin to transform css into cssobj (CSS in JS solution), map class names into cssobj localized names
+Babel plugin to transform css into [cssobj][] (CSS in JS solution), map class names into cssobj localized names
 
 [![Join the chat at https://gitter.im/css-in-js/cssobj](https://badges.gitter.im/css-in-js/cssobj.svg)](https://gitter.im/css-in-js/cssobj)
 [![Build Status](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj.svg?branch=master)](https://travis-ci.org/cssobj/babel-plugin-transform-cssobj)
@@ -94,7 +94,7 @@ Babel plugin to transform css into cssobj (CSS in JS solution), map class names 
             <a class={result.mapClass('!news item active')}>link text</a></div></div>;
     ```
 
-  **Note**: According to **cssobj** `mapClass` rule, the `!news` will become `news` and not localized (aka keep AS IS).
+  **Note**: According to [cssobj][] `mapClass` rule, the `!news` will become `news` and not localized (aka keep AS IS).
 
 ## More Usage
 
@@ -126,7 +126,7 @@ You have two way to escape the transform
   }
   ```
 
-  Then you can use `makeLocal` instead of `mapClass`, as a alias property of cssobj result
+  Then you can use `makeLocal` instead of `mapClass`, as a alias property of [cssobj][] result
 
   **Notice**: `makeLocal` **must not exists** in result object to avoid conflict
 
@@ -141,7 +141,7 @@ You have two way to escape the transform
 
 ## More about mapName
 
-  If you discard the cssobj result part, then the `mapName` is not alias, it's a real function
+  If you discard the [cssobj][] result part, then the `mapName` is not alias, it's a real function
 
   **Notice**: `makeLocal` **must exists** in your scope, it will be kept as real function
 
@@ -175,4 +175,6 @@ You have two way to escape the transform
 ## TODO
 
  - [ ] Support JSX Spread
- - [x] Child element should regard to parent cssobj scope
+ - [x] Child element should regard to parent [cssobj][] scope
+
+[cssobj]: https://github.com/cssobj/cssobj
